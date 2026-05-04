@@ -1,118 +1,44 @@
-const express = require("express");
-const cookieParser = require("cookie-parser");
+const express = require('express');
+const cors = require('cors');
+const setupSwagger = require('./config/swagger');
+const errorHandler = require('./middlewares/errorHandler');
 
-const authRoutes = require("./modules/auth/auth.routes");
-const authMiddleware = require("./middlewares/auth.middleware");
-const roleMiddleware = require("./middlewares/role.middleware");
-const authController = require("./modules/auth/auth.controller");
+const authRoutes       = require('./routes/authRoutes');
+const userRoutes       = require('./routes/userRoutes');
+const facultyRoutes    = require('./routes/facultyRoutes');
+const groupRoutes      = require('./routes/groupRoutes');
+const studentRoutes    = require('./routes/studentRoutes');
+const teacherRoutes    = require('./routes/teacherRoutes');
+const subjectRoutes    = require('./routes/subjectRoutes');
+const scheduleRoutes   = require('./routes/scheduleRoutes');
+const attendanceRoutes = require('./routes/attendanceRoutes');
+const gradeRoutes      = require('./routes/gradeRoutes');
 
 const app = express();
 
-app.use(express.json({ limit: "10kb" }));
+app.use(cors());
+app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser(process.env.COOKIE_SECRET));
 
-app.use((req, res, next) => {
-  res.setHeader("X-Content-Type-Options", "nosniff");
-  res.setHeader("X-Frame-Options", "DENY");
-  res.setHeader("X-XSS-Protection", "1; mode=block");
-  next();
-});
+setupSwagger(app);
 
-app.get("/", (req, res) => {
-  res.json({
-    success: true,
-    message: "Backend ishlayapti...",
-  });
-});
+app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
-app.use("/api/auth", authRoutes);
-app.get("/api/me", authMiddleware, authController.getMe);
-
-app.get(
-  "/api/admin-only",
-  authMiddleware,
-  roleMiddleware(["admin"]),
-  (req, res) => {
-    res.json({
-      success: true,
-      message: "Welcome, Admin! This is a restricted area.",
-      data: { user: req.user.toPublicProfile() },
-    });
-  }
-);
-
-app.get(
-  "/api/staff",
-  authMiddleware,
-  roleMiddleware(["admin", "teacher"]),
-  (req, res) => {
-    res.json({
-      success: true,
-      message: "Welcome, staff member!",
-      data: { user: req.user.toPublicProfile() },
-    });
-  }
-);
-
-app.get("/api/health", (req, res) => {
-  res.json({
-    success: true,
-    status: "ok",
-    environment: process.env.NODE_ENV,
-    timestamp: new Date().toISOString(),
-  });
-});
+app.use('/api/auth',       authRoutes);
+app.use('/api/users',      userRoutes);
+app.use('/api/faculties',  facultyRoutes);
+app.use('/api/groups',     groupRoutes);
+app.use('/api/students',   studentRoutes);
+app.use('/api/teachers',   teacherRoutes);
+app.use('/api/subjects',   subjectRoutes);
+app.use('/api/schedules',  scheduleRoutes);
+app.use('/api/attendance', attendanceRoutes);
+app.use('/api/grades',     gradeRoutes);
 
 app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: `Route ${req.method} ${req.originalUrl} not found`,
-  });
+  res.status(404).json({ success: false, message: `Route ${req.originalUrl} not found` });
 });
 
-// eslint-disable-next-line no-unused-vars
-app.use((err, req, res, next) => {
-  const isDev = process.env.NODE_ENV === "development";
-
-  if (err.code === 11000) {
-    const field = Object.keys(err.keyValue)[0];
-    return res.status(409).json({
-      success: false,
-      message: `An account with this ${field} already exists`,
-    });
-  }
-
-  if (err.name === "ValidationError") {
-    const errors = Object.values(err.errors).map((e) => ({
-      field: e.path,
-      message: e.message,
-    }));
-    return res.status(422).json({
-      success: false,
-      message: "Validation failed",
-      errors,
-    });
-  }
-
-  if (err.name === "CastError") {
-    return res.status(400).json({
-      success: false,
-      message: `Invalid value for field: ${err.path}`,
-    });
-  }
-
-  const statusCode = err.statusCode || 500;
-  const message =
-    statusCode === 500 && !isDev
-      ? "An unexpected error occurred. Please try again later."
-      : err.message;
-
-  res.status(statusCode).json({
-    success: false,
-    message,
-    ...(isDev && { stack: err.stack }),
-  });
-});
+app.use(errorHandler);
 
 module.exports = app;
