@@ -1,22 +1,10 @@
 {
-  "name": "hemis-auth",
+  "name": "hemis",
   "version": "1.0.0",
-  "description": "Production-ready Auth & Authorization module for HEMIS University Management System",
-  "main": "src/app.js",
+  "description": "HEMIS project",
+  "private": true,
   "scripts": {
-    "start": "node src/app.js",
-    "dev": "nodemon src/app.js"
-  },
-  "dependencies": {
-    "bcryptjs": "^2.4.3",
-    "cookie-parser": "^1.4.6",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "joi": "^17.13.1",
-    "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.4.0"
-  },
-  "devDependencies": {
-    "nodemon": "^3.1.3"
+    "dev": "npm --prefix backend run dev",
+    "start": "npm --prefix backend start"
   }
 }

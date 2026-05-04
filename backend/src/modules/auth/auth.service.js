@@ -1,9 +1,5 @@
 const User = require("../user/user.model");
-const {
-  generateTokenPair,
-  verifyRefreshToken,
-  hashValue,
-} = require("../../utils/token");
+const { generateTokenPair, verifyRefreshToken } = require("../../utils/token");
 const { hashValue: hashToken } = require("../../utils/hash");
 
 /**
