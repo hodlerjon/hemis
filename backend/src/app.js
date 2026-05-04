@@ -1,17 +1,15 @@
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const morgan = require('morgan');
+const express = require("express");
 
 const app = express();
 
-app.use(cors());
-app.use(helmet());
-app.use(morgan('dev'));
+// middleware
 app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.json({ message: 'HEMIS API ishlavvotti' });
+// test route
+app.get("/", (req, res) => {
+  res.json({
+    message: "Backend ishlayapti..."
+  });
 });
 
 module.exports = app;
