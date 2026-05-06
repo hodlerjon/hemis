@@ -92,4 +92,20 @@ const deleteStudent = asyncHandler(async (req, res) => {
   res.json({ success: true, message: 'Student deleted successfully' });
 });
 
-module.exports = { getStudents, getStudent, createStudent, updateStudent, deleteStudent };
+// @desc  Joriy talabaning o'z profili
+// @route GET /api/students/me
+// @access Private/Student
+const getMyProfile = asyncHandler(async (req, res) => {
+  const student = await Student.findOne({ user: req.user._id })
+    .populate('user', 'firstName lastName email')
+    .populate('faculty', 'name code')
+    .populate('group', 'name code year semester');
+
+  if (!student) {
+    res.status(404);
+    throw new Error('Student profile not found for this user');
+  }
+  res.json({ success: true, data: student });
+});
+
+module.exports = { getStudents, getStudent, getMyProfile, createStudent, updateStudent, deleteStudent };

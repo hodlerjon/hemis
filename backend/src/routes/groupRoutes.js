@@ -78,7 +78,21 @@ router.post(
   createGroup
 );
 
-router.put('/:id', protect, authorize('admin'), validateObjectId(), updateGroup);
+router.put(
+  '/:id',
+  protect,
+  authorize('admin'),
+  validateObjectId(),
+  [
+    body('name').optional().notEmpty().withMessage('Group name cannot be empty'),
+    body('code').optional().notEmpty().isLength({ max: 15 }).withMessage('Code max 15 chars'),
+    body('year').optional().isInt({ min: 1, max: 6 }).withMessage('Year must be between 1 and 6'),
+    body('semester').optional().isInt({ min: 1, max: 2 }).withMessage('Semester must be 1 or 2'),
+    body('isActive').optional().isBoolean().withMessage('isActive must be boolean'),
+  ],
+  handleValidation,
+  updateGroup
+);
 router.delete('/:id', protect, authorize('admin'), validateObjectId(), deleteGroup);
 
 module.exports = router;

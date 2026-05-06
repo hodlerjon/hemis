@@ -120,7 +120,19 @@ router.post(
  *       200:
  *         description: User updated
  */
-router.put('/:id', validateObjectId(), updateUser);
+router.put(
+  '/:id',
+  validateObjectId(),
+  [
+    body('firstName').optional().notEmpty().withMessage('First name cannot be empty'),
+    body('lastName').optional().notEmpty().withMessage('Last name cannot be empty'),
+    body('email').optional().isEmail().withMessage('Valid email is required'),
+    body('role').optional().isIn(['admin', 'teacher', 'student']).withMessage('Invalid role'),
+    body('isActive').optional().isBoolean().withMessage('isActive must be boolean'),
+  ],
+  handleValidation,
+  updateUser
+);
 
 /**
  * @swagger

@@ -1,7 +1,7 @@
 const express = require('express');
 const { body } = require('express-validator');
 const {
-  getStudents, getStudent, createStudent, updateStudent, deleteStudent,
+  getStudents, getStudent, getMyProfile, createStudent, updateStudent, deleteStudent,
 } = require('../controllers/studentController');
 const { protect } = require('../middlewares/authMiddleware');
 const authorize = require('../middlewares/authorize');
@@ -43,6 +43,7 @@ const router = express.Router();
  *       200:
  *         description: List of students
  */
+router.get('/me', protect, authorize('student'), getMyProfile);
 router.get('/', protect, authorize('admin', 'teacher'), getStudents);
 router.get('/:id', protect, validateObjectId(), getStudent);
 

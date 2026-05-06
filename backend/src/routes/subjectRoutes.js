@@ -80,7 +80,22 @@ router.post(
   createSubject
 );
 
-router.put('/:id', protect, authorize('admin'), validateObjectId(), updateSubject);
+router.put(
+  '/:id',
+  protect,
+  authorize('admin'),
+  validateObjectId(),
+  [
+    body('name').optional().notEmpty().withMessage('Subject name cannot be empty'),
+    body('code').optional().notEmpty().isLength({ max: 15 }).withMessage('Code max 15 chars'),
+    body('credits').optional().isInt({ min: 1, max: 10 }).withMessage('Credits must be 1–10'),
+    body('type').optional().isIn(['lecture', 'seminar', 'lab', 'practice']).withMessage('Invalid type'),
+    body('description').optional().isLength({ max: 500 }).withMessage('Description max 500 chars'),
+    body('isActive').optional().isBoolean().withMessage('isActive must be boolean'),
+  ],
+  handleValidation,
+  updateSubject
+);
 router.delete('/:id', protect, authorize('admin'), validateObjectId(), deleteSubject);
 
 module.exports = router;

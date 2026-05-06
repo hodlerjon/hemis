@@ -2,27 +2,46 @@ import { NavLink } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   LayoutDashboard, Users, GraduationCap, BookOpen, Users2,
-  Building2, BookMarked, Calendar, ClipboardCheck, Award, LogOut,
+  Building2, BookMarked, Calendar, ClipboardCheck, Award,
+  LogOut, UserCircle, ClipboardList,
 } from 'lucide-react';
-import { logout } from '../../features/auth/authSlice';
+import { logoutUser } from '../../features/auth/authSlice';
 
-const allNavItems = [
-  { path: '/dashboard',  label: 'Dashboard',  icon: LayoutDashboard,  roles: ['admin', 'teacher', 'student'] },
-  { path: '/users',      label: 'Users',       icon: Users,            roles: ['admin'] },
-  { path: '/students',   label: 'Students',    icon: GraduationCap,    roles: ['admin', 'teacher'] },
-  { path: '/teachers',   label: 'Teachers',    icon: BookOpen,         roles: ['admin'] },
-  { path: '/groups',     label: 'Groups',      icon: Users2,           roles: ['admin', 'teacher'] },
-  { path: '/faculties',  label: 'Faculties',   icon: Building2,        roles: ['admin'] },
-  { path: '/subjects',   label: 'Subjects',    icon: BookMarked,       roles: ['admin', 'teacher'] },
-  { path: '/schedules',  label: 'Schedules',   icon: Calendar,         roles: ['admin', 'teacher', 'student'] },
-  { path: '/attendance', label: 'Attendance',  icon: ClipboardCheck,  roles: ['admin', 'teacher', 'student'] },
-  { path: '/grades',     label: 'Grades',      icon: Award,            roles: ['admin', 'teacher', 'student'] },
-];
+const NAV = {
+  admin: [
+    { path: '/dashboard',  label: 'Dashboard',         icon: LayoutDashboard },
+    { path: '/users',      label: 'Foydalanuvchilar',   icon: Users },
+    { path: '/students',   label: 'Talabalar',           icon: GraduationCap },
+    { path: '/teachers',   label: "O'qituvchilar",       icon: BookOpen },
+    { path: '/groups',     label: 'Guruhlar',            icon: Users2 },
+    { path: '/faculties',  label: 'Fakultetlar',         icon: Building2 },
+    { path: '/subjects',   label: 'Fanlar',              icon: BookMarked },
+    { path: '/schedules',  label: 'Jadval',              icon: Calendar },
+    { path: '/attendance', label: 'Davomat',             icon: ClipboardCheck },
+    { path: '/grades',     label: 'Baholar',             icon: Award },
+  ],
+  teacher: [
+    { path: '/teacher/dashboard',  label: 'Bosh sahifa',       icon: LayoutDashboard },
+    { path: '/teacher/attendance', label: 'Davomat belgilash', icon: ClipboardCheck },
+    { path: '/subjects',           label: 'Fanlarim',           icon: BookMarked },
+    { path: '/students',           label: 'Talabalar',          icon: GraduationCap },
+    { path: '/schedules',          label: 'Jadval',             icon: Calendar },
+    { path: '/grades',             label: 'Baholar',            icon: Award },
+  ],
+  student: [
+    { path: '/student/dashboard',  label: 'Bosh sahifa',  icon: LayoutDashboard },
+    { path: '/student/schedule',   label: 'Dars jadvali', icon: Calendar },
+    { path: '/student/grades',     label: 'Baholarim',    icon: Award },
+    { path: '/student/attendance', label: 'Davomatim',    icon: ClipboardList },
+  ],
+};
+
+const ROLE_LABEL = { admin: 'Administrator', teacher: "O'qituvchi", student: 'Talaba' };
 
 const Sidebar = () => {
-  const dispatch = useDispatch();
-  const { user } = useSelector((s) => s.auth);
-  const navItems = allNavItems.filter((i) => i.roles.includes(user?.role));
+  const dispatch  = useDispatch();
+  const { user }  = useSelector((s) => s.auth);
+  const navItems  = NAV[user?.role] || [];
 
   return (
     <aside className="fixed left-0 top-0 h-full w-60 bg-slate-900 flex flex-col z-40">
@@ -55,20 +74,29 @@ const Sidebar = () => {
         ))}
       </nav>
 
-      {/* User + Logout */}
-      <div className="px-3 py-4 border-t border-slate-700">
-        <div className="px-3 py-2 mb-1">
+      {/* Profil + Chiqish */}
+      <div className="px-3 py-4 border-t border-slate-700 space-y-0.5">
+        <div className="px-3 py-2">
           <p className="text-sm font-medium text-white truncate">
             {user?.firstName} {user?.lastName}
           </p>
-          <p className="text-xs text-slate-400 capitalize">{user?.role}</p>
+          <p className="text-xs text-slate-400">{ROLE_LABEL[user?.role] || user?.role}</p>
         </div>
+        <NavLink
+          to="/profile"
+          className={({ isActive }) =>
+            `sidebar-link ${isActive ? 'sidebar-link-active' : 'sidebar-link-inactive'}`
+          }
+        >
+          <UserCircle size={18} />
+          <span>Profil</span>
+        </NavLink>
         <button
-          onClick={() => dispatch(logout())}
+          onClick={() => dispatch(logoutUser())}
           className="sidebar-link sidebar-link-inactive w-full text-red-400 hover:text-red-300 hover:bg-red-900/20"
         >
           <LogOut size={18} />
-          <span>Logout</span>
+          <span>Chiqish</span>
         </button>
       </div>
     </aside>

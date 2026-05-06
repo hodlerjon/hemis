@@ -95,7 +95,23 @@ router.post(
   createSchedule
 );
 
-router.put('/:id', protect, authorize('admin'), validateObjectId(), updateSchedule);
+router.put(
+  '/:id',
+  protect,
+  authorize('admin'),
+  validateObjectId(),
+  [
+    body('dayOfWeek').optional().isInt({ min: 1, max: 7 }).withMessage('Day must be 1–7'),
+    body('startTime').optional().matches(/^([01]\d|2[0-3]):([0-5]\d)$/).withMessage('Start time must be HH:MM'),
+    body('endTime').optional().matches(/^([01]\d|2[0-3]):([0-5]\d)$/).withMessage('End time must be HH:MM'),
+    body('room').optional().notEmpty().isLength({ max: 20 }).withMessage('Room max 20 chars'),
+    body('semester').optional().isInt({ min: 1, max: 2 }).withMessage('Semester must be 1 or 2'),
+    body('academicYear').optional().matches(/^\d{4}-\d{4}$/).withMessage('Academic year must be YYYY-YYYY'),
+    body('isActive').optional().isBoolean().withMessage('isActive must be boolean'),
+  ],
+  handleValidation,
+  updateSchedule
+);
 router.delete('/:id', protect, authorize('admin'), validateObjectId(), deleteSchedule);
 
 module.exports = router;

@@ -105,7 +105,20 @@ router.post(
  *       200:
  *         description: Faculty updated
  */
-router.put('/:id', protect, authorize('admin'), validateObjectId(), updateFaculty);
+router.put(
+  '/:id',
+  protect,
+  authorize('admin'),
+  validateObjectId(),
+  [
+    body('name').optional().notEmpty().withMessage('Faculty name cannot be empty'),
+    body('code').optional().notEmpty().isLength({ max: 10 }).withMessage('Code max 10 chars'),
+    body('description').optional().isLength({ max: 500 }).withMessage('Description max 500 chars'),
+    body('isActive').optional().isBoolean().withMessage('isActive must be boolean'),
+  ],
+  handleValidation,
+  updateFaculty
+);
 
 /**
  * @swagger
